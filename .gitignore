@@ -1,0 +1,8 @@
+*.vercel
+*.jpeg*
+*.jpg
+*.pdf
+*.png
+*.mov
+*.mp4
+*.env
