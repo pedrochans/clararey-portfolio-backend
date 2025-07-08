@@ -87,7 +87,9 @@ def home():
         "status": "active",
         "endpoints": {
             "POST /contact": "Enviar mensaje de contacto",
-            "GET /health": "Estado del servicio"
+            "POST /api/contact": "Enviar mensaje de contacto (alternativo)",
+            "GET /health": "Estado del servicio",
+            "GET /api/health": "Estado del servicio (alternativo)"
         }
     }
 
@@ -137,6 +139,17 @@ def contact():
 def health():
     """Health check para Render"""
     return {"status": "healthy"}
+
+# Rutas alternativas para compatibilidad con frontend
+@app.route("/api/contact", methods=['POST'])
+def api_contact():
+    """Endpoint alternativo para el frontend (redirige a contact)"""
+    return contact()
+
+@app.route("/api/health")
+def api_health():
+    """Health check alternativo para el frontend"""
+    return health()
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
