@@ -19,7 +19,7 @@ Deberías ver información del servicio y endpoints disponibles.
 Abre terminal y ejecuta (reemplaza la URL por la tuya):
 
 ```bash
-curl -X POST https://TU-URL-DE-RENDER.onrender.com/contact \
+curl -X POST https://clararey-portfolio-backend.onrender.com/contact \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "Prueba",
@@ -32,7 +32,7 @@ curl -X POST https://TU-URL-DE-RENDER.onrender.com/contact \
 ## **4. Probar con Postman o Insomnia**
 
 1. **Método**: POST
-2. **URL**: `https://TU-URL-DE-RENDER.onrender.com/contact`
+2. **URL**: `https://clararey-portfolio-backend.onrender.com/contact`
 3. **Headers**: `Content-Type: application/json`
 4. **Body (JSON)**:
 ```json
@@ -49,7 +49,7 @@ curl -X POST https://TU-URL-DE-RENDER.onrender.com/contact \
 Ve a cualquier página web, abre las Developer Tools (F12), ve a Console y ejecuta:
 
 ```javascript
-fetch('https://TU-URL-DE-RENDER.onrender.com/contact', {
+fetch('https://clararey-portfolio-backend.onrender.com/contact', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
