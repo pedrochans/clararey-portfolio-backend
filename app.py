@@ -40,30 +40,39 @@ def send_email(nombre, apellido, email, mensaje):
         msg['Reply-To'] = email
         msg['Subject'] = f"Portfolio: Mensaje de {nombre} {apellido}"
         
-        # HTML del email
+        # HTML del email con estilo acorde a la web y logo
         html_body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333; border-bottom: 2px solid #007bff;">
-                Nuevo mensaje desde tu Portfolio
-            </h2>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                <p><strong>Nombre:</strong> {nombre} {apellido}</p>
-                <p><strong>Email:</strong> <a href="mailto:{email}">{email}</a></p>
+        <body style="font-family: 'Lato', Arial, sans-serif; background: #fff; color: #111; max-width: 600px; margin: 0 auto; padding: 0;">
+            <div style="text-align: center; margin-top: 30px;">
+                <img src='cid:logo_clara' alt='Logo Clara Rey' style="width: 90px; height: auto; margin-bottom: 10px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
             </div>
-            <div style="margin: 20px 0;">
-                <h3>Mensaje:</h3>
-                <div style="background: white; padding: 15px; border-left: 4px solid #007bff;">
-                    <p style="white-space: pre-wrap;">{mensaje}</p>
+            <h2 style="color: #111; border-bottom: 2px solid #111; padding-bottom: 8px; margin-top: 10px; font-weight: 700; letter-spacing: 1px;">Nuevo mensaje desde tu Portfolio</h2>
+            <div style="background: #fff; border: 1px solid #eee; padding: 18px 20px; border-radius: 8px; margin: 24px 0 18px 0;">
+                <p style="margin: 0 0 8px 0;"><strong>Nombre:</strong> {nombre} {apellido}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href='mailto:{email}' style='color: #111; text-decoration: underline;'>{email}</a></p>
+            </div>
+            <div style="margin: 18px 0 28px 0;">
+                <h3 style="margin: 0 0 8px 0; color: #111; font-size: 1.1em; font-weight: 700;">Mensaje:</h3>
+                <div style="background: #fafafa; padding: 18px; border-left: 4px solid #111; border-radius: 6px;">
+                    <p style="white-space: pre-wrap; margin: 0; color: #222;">{mensaje}</p>
                 </div>
             </div>
-            <hr>
-            <p style="font-size: 12px; color: #666; text-align: center;">
-                Enviado desde el formulario de contacto del portfolio
-            </p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0 10px 0;">
+            <p style="font-size: 12px; color: #888; text-align: center; margin: 0 0 10px 0;">Enviado desde el formulario de contacto del portfolio de Clara Rey</p>
         </body>
         </html>
         """
+
+        # Adjuntar el logo como imagen embebida (cid)
+        from email.mime.image import MIMEImage
+        logo_path = os.path.join(os.path.dirname(__file__), 'imag/00_logo_cr.jpg')
+        if os.path.exists(logo_path):
+            with open(logo_path, 'rb') as img_file:
+                logo = MIMEImage(img_file.read())
+                logo.add_header('Content-ID', '<logo_clara>')
+                logo.add_header('Content-Disposition', 'inline', filename='imag/00_logo_cr.jpg')
+                msg.attach(logo)
         
         msg.attach(MIMEText(html_body, 'html'))
         
