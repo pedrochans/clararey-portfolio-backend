@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Formulario Portfolio Clara</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Formulario Portfolio Clara</h1>
+    <p>Esta página sirve para probar el formulario independientemente del portfolio.</p>
+    
+    <form id="test-form">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" value="Test" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido" value="Usuario" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="test@example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="mensaje">Mensaje:</label>
+            <textarea id="mensaje" name="mensaje" rows="4" required>Este es un mensaje de prueba para verificar que el formulario del portfolio funciona correctamente.</textarea>
+        </div>
+        
+        <button type="submit" id="submit-btn">Enviar Mensaje de Prueba</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('test-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const result = document.getElementById('result');
+            
+            // Mostrar estado de carga
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+            result.innerHTML = '';
+            
+            // Obtener datos del formulario
+            const formData = {
+                nombre: document.getElementById('nombre').value.trim(),
+                apellido: document.getElementById('apellido').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                mensaje: document.getElementById('mensaje').value.trim()
+            };
+            
+            try {
+                // CAMBIAR ESTA URL POR LA TUYA DE RENDER
+                const response = await fetch('https://TU-URL-DE-RENDER.onrender.com/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="result success">
+                            <strong>✅ ¡Éxito!</strong><br>
+                            ${data.message}<br>
+                            <small>Revisa el email clarareigle5@gmail.com</small>
+                        </div>
+                    `;
+                    document.getElementById('test-form').reset();
+                } else {
+                    result.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Error:</strong><br>
+                            ${data.error || data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Error de conexión:</strong><br>
+                        ${error.message}<br>
+                        <small>Verifica que la URL del backend sea correcta y que el servicio esté activo.</small>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Mensaje de Prueba';
+            }
+        });
+    </script>
+</body>
+</html>

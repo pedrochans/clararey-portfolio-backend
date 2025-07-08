@@ -7,197 +7,137 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import re
-import logging
 
 # Cargar variables de entorno
 load_dotenv()
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 app = Flask(__name__)
 
-# Configurar CORS para permitir requests desde tu frontend
+# Configurar CORS para el frontend
 CORS(app, origins=[
-    "https://clara-portfolio.netlify.app",  # Tu dominio de producción si usas Netlify
-    "http://localhost:3000",  # Para desarrollo local
-    "http://127.0.0.1:3000",  # Para desarrollo local
-    "file://"  # Para archivos locales
+    "*"  # En producción, cambiar por dominios específicos
 ])
-
-# Configuración de email
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-EMAIL_USER = os.getenv('EMAIL_USER')  # Tu email de Gmail
-EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')  # Tu contraseña de aplicación de Gmail
-EMAIL_RECIPIENT = 'clarareigle5@gmail.com'  # Email donde recibirás los mensajes
 
 def validate_email(email):
     """Validar formato de email"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
-def sanitize_input(text):
-    """Limpiar input del usuario"""
-    if not text:
-        return ""
-    text = str(text).strip()
-    return text[:1000]  # Limitar longitud
-
 def send_email(nombre, apellido, email, mensaje):
-    """Enviar email con los datos del formulario"""
+    """Enviar email usando Gmail SMTP"""
     try:
+        # Configuración desde variables de entorno
+        smtp_user = os.getenv('EMAIL_USER')
+        smtp_password = os.getenv('EMAIL_PASSWORD')
+        
+        if not smtp_user or not smtp_password:
+            raise Exception("Variables de entorno EMAIL_USER o EMAIL_PASSWORD no configuradas")
+        
         # Crear mensaje
         msg = MIMEMultipart()
-        msg['From'] = EMAIL_USER
-        msg['To'] = EMAIL_RECIPIENT
+        msg['From'] = smtp_user
+        msg['To'] = 'clarareigle5@gmail.com'
         msg['Reply-To'] = email
-        msg['Subject'] = f"Nuevo mensaje del portfolio - {nombre} {apellido}"
+        msg['Subject'] = f"Portfolio: Mensaje de {nombre} {apellido}"
         
-        # Cuerpo del email en HTML
-        body = f"""
+        # HTML del email
+        html_body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-                    Nuevo mensaje desde tu Portfolio
-                </h2>
-                
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <p><strong style="color: #2c3e50;">Nombre:</strong> {nombre} {apellido}</p>
-                    <p><strong style="color: #2c3e50;">Email:</strong> 
-                        <a href="mailto:{email}" style="color: #3498db;">{email}</a>
-                    </p>
-                </div>
-                
-                <div style="margin: 20px 0;">
-                    <h3 style="color: #2c3e50;">Mensaje:</h3>
-                    <div style="background-color: #ffffff; padding: 20px; border-left: 4px solid #3498db; margin: 10px 0;">
-                        <p style="margin: 0; white-space: pre-wrap;">{mensaje}</p>
-                    </div>
-                </div>
-                
-                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="font-size: 12px; color: #666; text-align: center;">
-                    Este mensaje fue enviado desde el formulario de contacto de tu portfolio web.
-                </p>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333; border-bottom: 2px solid #007bff;">
+                Nuevo mensaje desde tu Portfolio
+            </h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                <p><strong>Nombre:</strong> {nombre} {apellido}</p>
+                <p><strong>Email:</strong> <a href="mailto:{email}">{email}</a></p>
             </div>
+            <div style="margin: 20px 0;">
+                <h3>Mensaje:</h3>
+                <div style="background: white; padding: 15px; border-left: 4px solid #007bff;">
+                    <p style="white-space: pre-wrap;">{mensaje}</p>
+                </div>
+            </div>
+            <hr>
+            <p style="font-size: 12px; color: #666; text-align: center;">
+                Enviado desde el formulario de contacto del portfolio
+            </p>
         </body>
         </html>
         """
         
-        msg.attach(MIMEText(body, 'html', 'utf-8'))
+        msg.attach(MIMEText(html_body, 'html'))
         
-        # Crear conexión segura y enviar email
+        # Enviar email
         context = ssl.create_default_context()
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls(context=context)
-            server.login(EMAIL_USER, EMAIL_PASSWORD)
+            server.login(smtp_user, smtp_password)
             server.send_message(msg)
             
-        logger.info(f"Email enviado exitosamente desde {email}")
         return True
     except Exception as e:
-        logger.error(f"Error enviando email: {str(e)}")
+        print(f"Error enviando email: {str(e)}")
         return False
 
 @app.route("/")
 def home():
+    """Página de inicio del API"""
     return {
-        "message": "Backend del Portfolio de Clara Rey",
-        "status": "funcionando correctamente",
-        "version": "1.0",
+        "service": "Portfolio Clara Rey - Backend",
+        "status": "active",
         "endpoints": {
-            "contact": "/contact (POST)",
-            "health": "/health (GET)"
+            "POST /contact": "Enviar mensaje de contacto",
+            "GET /health": "Estado del servicio"
         }
     }
 
-@app.route("/contact", methods=['POST', 'OPTIONS'])
+@app.route("/contact", methods=['POST'])
 def contact():
-    """Endpoint para manejar el formulario de contacto"""
-    # Manejar preflight CORS request
-    if request.method == 'OPTIONS':
-        return '', 200
-        
+    """Endpoint para recibir mensajes del formulario"""
     try:
-        # Verificar que sea una petición POST con JSON
+        # Verificar JSON
         if not request.is_json:
-            return jsonify({
-                "success": False,
-                "message": "Content-Type debe ser application/json"
-            }), 400
+            return jsonify({"success": False, "error": "Formato JSON requerido"}), 400
         
         data = request.get_json()
         
-        # Validar que todos los campos requeridos estén presentes
-        required_fields = ['nombre', 'apellido', 'email', 'mensaje']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({
-                    "success": False,
-                    "message": f"El campo '{field}' es requerido"
-                }), 400
+        # Validar campos requeridos
+        required = ['nombre', 'apellido', 'email', 'mensaje']
+        for field in required:
+            if not data.get(field, '').strip():
+                return jsonify({"success": False, "error": f"Campo '{field}' requerido"}), 400
         
-        # Obtener y limpiar datos
-        nombre = sanitize_input(data.get('nombre'))
-        apellido = sanitize_input(data.get('apellido'))
-        email = sanitize_input(data.get('email'))
-        mensaje = sanitize_input(data.get('mensaje'))
+        # Limpiar datos
+        nombre = data['nombre'].strip()[:100]
+        apellido = data['apellido'].strip()[:100]
+        email = data['email'].strip()[:200]
+        mensaje = data['mensaje'].strip()[:2000]
         
-        # Validar email
-        if not validate_email(email):
-            return jsonify({
-                "success": False,
-                "message": "El formato del email no es válido"
-            }), 400
-        
-        # Validar longitud de campos
+        # Validaciones
         if len(nombre) < 2 or len(apellido) < 2:
-            return jsonify({
-                "success": False,
-                "message": "Nombre y apellido deben tener al menos 2 caracteres"
-            }), 400
-        
+            return jsonify({"success": False, "error": "Nombre y apellido muy cortos"}), 400
+            
+        if not validate_email(email):
+            return jsonify({"success": False, "error": "Email inválido"}), 400
+            
         if len(mensaje) < 10:
-            return jsonify({
-                "success": False,
-                "message": "El mensaje debe tener al menos 10 caracteres"
-            }), 400
-        
-        # Verificar configuración de email
-        if not EMAIL_USER or not EMAIL_PASSWORD:
-            logger.error("Variables de entorno EMAIL_USER o EMAIL_PASSWORD no configuradas")
-            return jsonify({
-                "success": False,
-                "message": "Servicio de email no configurado correctamente"
-            }), 500
+            return jsonify({"success": False, "error": "Mensaje muy corto (mín 10 caracteres)"}), 400
         
         # Enviar email
         if send_email(nombre, apellido, email, mensaje):
-            return jsonify({
-                "success": True,
-                "message": "¡Mensaje enviado correctamente! Te responderé pronto."
-            }), 200
+            return jsonify({"success": True, "message": "Mensaje enviado correctamente"})
         else:
-            return jsonify({
-                "success": False,
-                "message": "Error al enviar el mensaje. Por favor, intenta más tarde."
-            }), 500
+            return jsonify({"success": False, "error": "Error al enviar mensaje"}), 500
             
     except Exception as e:
-        logger.error(f"Error en endpoint contact: {str(e)}")
-        return jsonify({
-            "success": False,
-            "message": "Error interno del servidor"
-        }), 500
+        print(f"Error en /contact: {str(e)}")
+        return jsonify({"success": False, "error": "Error interno del servidor"}), 500
 
 @app.route("/health")
 def health():
-    """Endpoint de salud para Render"""
-    return {"status": "healthy", "service": "portfolio-backend"}, 200
+    """Health check para Render"""
+    return {"status": "healthy"}
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port)
