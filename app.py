@@ -47,7 +47,7 @@ def send_email(nombre, apellido, email, mensaje):
             <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <!-- Header con logo -->
                 <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #eee;">
-                    <img src="https://clararey-portfolio.vercel.app/img/00_logo_cr.jpg" alt="Clara Rey Logo" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: auto;">
+                    <img src="https://clararey-portfolio.vercel.app/img/00_logo_cr.jpg" alt="Clara Rey Logo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: auto; padding: 10px; background-color: white;">
                     <h1 style="color: #333; margin: 0; font-size: 24px; font-weight: 300;">Clara Rey Portfolio</h1>
                     <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Nuevo mensaje de contacto</p>
                 </div>
