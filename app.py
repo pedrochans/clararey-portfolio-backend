@@ -36,7 +36,7 @@ def send_email(nombre, apellido, email, mensaje):
         # Crear mensaje
         msg = MIMEMultipart()
         msg['From'] = smtp_user
-        msg['To'] = 'clarareigle5@gmail.com'
+        msg['To'] = 'chans_99@yahoo.es'
         msg['Reply-To'] = email
         msg['Subject'] = f"Portfolio: Mensaje de {nombre} {apellido}"
         
