@@ -40,39 +40,46 @@ def send_email(nombre, apellido, email, mensaje):
         msg['Reply-To'] = email
         msg['Subject'] = f"Portfolio: Mensaje de {nombre} {apellido}"
         
-        # HTML del email con estilo acorde a la web y logo
+        # HTML del email CON logo desde tu web
         html_body = f"""
         <html>
-        <body style="font-family: 'Lato', Arial, sans-serif; background: #fff; color: #111; max-width: 600px; margin: 0 auto; padding: 0;">
-            <div style="text-align: center; margin-top: 30px;">
-                <img src='cid:logo_clara' alt='Logo Clara Rey' style="width: 90px; height: auto; margin-bottom: 10px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            </div>
-            <h2 style="color: #111; border-bottom: 2px solid #111; padding-bottom: 8px; margin-top: 10px; font-weight: 700; letter-spacing: 1px;">Nuevo mensaje desde tu Portfolio</h2>
-            <div style="background: #fff; border: 1px solid #eee; padding: 18px 20px; border-radius: 8px; margin: 24px 0 18px 0;">
-                <p style="margin: 0 0 8px 0;"><strong>Nombre:</strong> {nombre} {apellido}</p>
-                <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href='mailto:{email}' style='color: #111; text-decoration: underline;'>{email}</a></p>
-            </div>
-            <div style="margin: 18px 0 28px 0;">
-                <h3 style="margin: 0 0 8px 0; color: #111; font-size: 1.1em; font-weight: 700;">Mensaje:</h3>
-                <div style="background: #fafafa; padding: 18px; border-left: 4px solid #111; border-radius: 6px;">
-                    <p style="white-space: pre-wrap; margin: 0; color: #222;">{mensaje}</p>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f9f9f9;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <!-- Header con logo -->
+                <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #eee;">
+                    <img src="https://clararey-portfolio.vercel.app/img/00_logo_cr.jpg" alt="Clara Rey Logo" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: auto;">
+                    <h1 style="color: #333; margin: 0; font-size: 24px; font-weight: 300;">Clara Rey Portfolio</h1>
+                    <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Nuevo mensaje de contacto</p>
+                </div>
+                
+                <h2 style="color: #333; margin-bottom: 20px; font-size: 20px;">
+                    Mensaje de {nombre} {apellido}
+                </h2>
+                
+                <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+                    <p style="margin: 5px 0;"><strong>Nombre completo:</strong> {nombre} {apellido}</p>
+                    <p style="margin: 5px 0;"><strong>Email de contacto:</strong> <a href="mailto:{email}" style="color: #007bff; text-decoration: none;">{email}</a></p>
+                </div>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid #007bff;">
+                    <h3 style="color: #333; margin-top: 0; font-size: 16px;">Mensaje:</h3>
+                    <p style="color: #555; line-height: 1.6; white-space: pre-wrap; margin: 10px 0 0 0;">{mensaje}</p>
+                </div>
+                
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+                
+                <div style="text-align: center;">
+                    <p style="color: #666; font-size: 12px; margin: 0;">
+                        Este mensaje fue enviado desde el formulario de contacto del portfolio de Clara Rey
+                    </p>
+                    <p style="color: #666; font-size: 12px; margin: 5px 0 0 0;">
+                        Responde directamente a este email para contactar con {nombre}
+                    </p>
                 </div>
             </div>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0 10px 0;">
-            <p style="font-size: 12px; color: #888; text-align: center; margin: 0 0 10px 0;">Enviado desde el formulario de contacto del portfolio de Clara Rey</p>
         </body>
         </html>
         """
-
-        # Adjuntar el logo como imagen embebida (cid)
-        from email.mime.image import MIMEImage
-        logo_path = os.path.join(os.path.dirname(__file__), 'imag/00_logo_cr.jpg')
-        if os.path.exists(logo_path):
-            with open(logo_path, 'rb') as img_file:
-                logo = MIMEImage(img_file.read())
-                logo.add_header('Content-ID', '<logo_clara>')
-                logo.add_header('Content-Disposition', 'inline', filename='imag/00_logo_cr.jpg')
-                msg.attach(logo)
         
         msg.attach(MIMEText(html_body, 'html'))
         
@@ -166,4 +173,5 @@ def create_app():
 # Soporte para gunicorn y ejecución directa
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    # Eliminar debug=True para reducir warnings en desarrollo
+    app.run(host='0.0.0.0', port=port, debug=False)
